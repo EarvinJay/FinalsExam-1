@@ -9,6 +9,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.usjr.finalsexam.R;
@@ -23,9 +26,10 @@ public class VideoListFragment extends Fragment implements AdapterView.OnItemCli
         void videoSelectedListener(Video video);
     }
 
+
     private VideoListAdapter        mAdapter;
     private OnVideoSelectedListener mOnVideoSelectedListener;
-
+    ListView listView;
     private DatabaseReference mRootDb;
     private DatabaseReference mVideosDb;
 
@@ -48,16 +52,49 @@ public class VideoListFragment extends Fragment implements AdapterView.OnItemCli
 
         mRootDb = FirebaseDatabase.getInstance().getReference();
         mVideosDb = mRootDb.child("videos");
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_video_list, container, false);
-        ListView listView = (ListView) view.findViewById(R.id.listView);
+        listView = (ListView) view.findViewById(R.id.listView);
 
         mAdapter = new VideoListAdapter(getContext(), new ArrayList<Video>());
+
+
+    mVideosDb.addChildEventListener(new ChildEventListener() {
+    @Override
+    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+        Video videomodel=dataSnapshot.getValue(Video.class);
+        mAdapter.add(videomodel);
+    }
+
+    @Override
+    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+    }
+
+    @Override
+    public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+    }
+
+    @Override
+    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+    }
+
+    @Override
+    public void onCancelled(DatabaseError databaseError) {
+
+    }
+});
+
         listView.setAdapter(mAdapter);
+
+
 
         return view;
     }
